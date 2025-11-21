@@ -1,0 +1,140 @@
+"use client";
+
+import { Payment, PaymentStatus } from "@/lib/types";
+import { StatusBadge } from "./StatusBadge";
+import { formatEther } from "viem";
+import { useState } from "react";
+import { RefundModal } from "./RefundModal";
+import { useAccount } from "wagmi";
+import { useCompletePayment } from "@/lib/hooks/useCompletePayment";
+
+interface PaymentCardProps {
+  payment: Payment;
+  onRefetch?: () => void;
+}
+
+export function PaymentCard({ payment, onRefetch }: PaymentCardProps) {
+  const { address } = useAccount();
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const { completePayment, isPending: isCompleting } = useCompletePayment();
+
+  const isSender = address?.toLowerCase() === payment.sender.toLowerCase();
+  const isReceiver = address?.toLowerCase() === payment.receiver.toLowerCase();
+
+  const formatDate = (timestamp: bigint) => {
+    return new Date(Number(timestamp) * 1000).toLocaleString();
+  };
+
+  const formatAddress = (addr: string) => {
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
+  const handleComplete = async () => {
+    try {
+      await completePayment(payment.id);
+      if (onRefetch) onRefetch();
+    } catch (error) {
+      console.error("Error completing payment:", error);
+    }
+  };
+
+  const canRequestRefund =
+    isSender && payment.status === PaymentStatus.Pending;
+  const canComplete =
+    (isSender || isReceiver) && payment.status === PaymentStatus.Pending;
+
+  return (
+    <>
+      <div className="card hover:shadow-lg transition-shadow">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="text-xl font-bold text-gray-800">
+              Payment #{payment.id.toString()}
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              {formatDate(payment.timestamp)}
+            </p>
+          </div>
+          <StatusBadge status={payment.status} />
+        </div>
+
+        <div className="space-y-3 mb-4">
+          <div className="flex justify-between">
+            <span className="text-gray-600">Amount:</span>
+            <span className="font-bold text-lg text-primary">
+              {formatEther(payment.amount)} MATIC
+            </span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="text-gray-600">From:</span>
+            <span className="font-mono text-sm">
+              {formatAddress(payment.sender)}
+              {isSender && (
+                <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  You
+                </span>
+              )}
+            </span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="text-gray-600">To:</span>
+            <span className="font-mono text-sm">
+              {formatAddress(payment.receiver)}
+              {isReceiver && (
+                <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                  You
+                </span>
+              )}
+            </span>
+          </div>
+
+          {payment.disputeReason && (
+            <div className="pt-3 border-t">
+              <span className="text-gray-600 font-semibold">Dispute Reason:</span>
+              <p className="text-gray-800 mt-1">{payment.disputeReason}</p>
+              {payment.evidence && (
+                <p className="text-gray-600 text-sm mt-2">
+                  Evidence: {payment.evidence}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-2 mt-4">
+          {canRequestRefund && (
+            <button
+              onClick={() => setShowRefundModal(true)}
+              className="btn-danger flex-1"
+            >
+              Request Refund
+            </button>
+          )}
+          {canComplete && (
+            <button
+              onClick={handleComplete}
+              disabled={isCompleting}
+              className="btn-success flex-1"
+            >
+              {isCompleting ? "Processing..." : "Complete Payment"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {showRefundModal && (
+        <RefundModal
+          payment={payment}
+          onClose={() => setShowRefundModal(false)}
+          onSuccess={() => {
+            setShowRefundModal(false);
+            if (onRefetch) onRefetch();
+          }}
+        />
+      )}
+    </>
+  );
+}
+
