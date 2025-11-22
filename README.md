@@ -1,17 +1,28 @@
 # x402 Refund & Dispute Layer
 
-A secure escrow and dispute resolution system built on top of x402 payments for the Polygon network. This project provides a trust layer for crypto commerce by enabling refunds and automated dispute resolution.
+A secure escrow and dispute resolution system extending the x402 payment protocol for Polygon. This project provides the missing trust layer for crypto commerce by enabling refunds, disputes, and AI-powered resolution.
+
+## How We Extend x402
+
+**x402** is Polygon's payment intent protocol - it enables programmable, flexible payment flows instead of direct transfers. However, it lacks built-in refund and dispute mechanisms.
+
+**Our Extension** adds:
+- **Escrow Security**: Holds x402 payment intents in smart contract escrow
+- **Refund Management**: First-class refund request and processing system
+- **AI Dispute Resolution**: Agentic AI (Groq) analyzes disputes and suggests outcomes
+- **Fraud Protection**: 14-day dispute window with automatic completion
+- **Batch Operations**: Efficiently resolve multiple disputes at once
 
 ## Project Overview
 
 **Problem:** Crypto payments are final — users can't request refunds. Disputes (e.g., seller never shipped, wrong product, duplicate payment) are difficult to resolve. Merchants and platforms need a trust layer to handle refunds without centralizing funds.
 
-**Solution:** A Refund & Dispute Layer on top of x402 that:
+**Solution:** A Refund & Dispute Layer extending x402 that:
 - Holds funds temporarily in a smart contract (escrow)
 - Tracks payment status and user claims
-- Provides simple dispute resolution logic
-- Allows automatic or semi-automatic refunds
-- Integrates AI agents to suggest dispute outcomes
+- Provides dispute resolution logic with AI analysis
+- Allows automatic or AI-suggested refunds
+- Integrates real AI agents (Groq) for intelligent dispute resolution
 
 ## Links
 
@@ -34,8 +45,9 @@ A secure escrow and dispute resolution system built on top of x402 payments for 
 - Deployed on **Polygon Amoy Testnet**
 - Modern Next.js 14 frontend with App Router
 - Web3 integration with wagmi v2 and RainbowKit
-- Simulated AI dispute analysis with rule-based logic
+- **Real AI Integration**: Uses Groq API for intelligent dispute analysis (with rule-based fallback)
 - Comprehensive smart contract tests (>80% coverage)
+- Batch operations for gas efficiency
 
 ## Architecture
 
@@ -86,7 +98,18 @@ POLYGONSCAN_API_KEY=your_polygonscan_api_key
 # Frontend
 NEXT_PUBLIC_CONTRACT_ADDRESS=deployed_contract_address
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
+
+# AI Analysis (Optional - Get free key at https://console.groq.com/keys)
+NEXT_PUBLIC_GROQ_API_KEY=your_groq_api_key_here
 ```
+
+**Get a free Groq API key**:
+1. Visit https://console.groq.com/keys
+2. Sign up (free)
+3. Create an API key
+4. Add to `.env`
+
+The AI analysis will use real Groq AI if key is provided, otherwise falls back to rule-based logic.
 
 ### Deploy Smart Contracts
 
