@@ -48,11 +48,13 @@ contract DisputeEscrow {
     uint256 public paymentCounter;
     uint256 public constant DISPUTE_WINDOW = 7 days;
     uint256 public constant AUTO_COMPLETE_DELAY = 14 days;
+    uint256 public constant RECEIVER_CLAIM_DELAY = 14 days;
 
     // Mappings
     mapping(uint256 => Payment) public payments;
     mapping(address => uint256[]) public senderPayments;
     mapping(address => uint256[]) public receiverPayments;
+    mapping(address => bool) public admins; // Admin whitelist
 
     // Events
     event PaymentCreated(
@@ -87,6 +89,9 @@ contract DisputeEscrow {
     );
 
     event ResolverUpdated(address indexed oldResolver, address indexed newResolver);
+    event AdminAdded(address indexed admin);
+    event AdminRemoved(address indexed admin);
+    event PaymentClaimed(uint256 indexed paymentId, address indexed receiver, uint256 timestamp);
 
     // Modifiers
     modifier onlyOwner() {
@@ -102,6 +107,11 @@ contract DisputeEscrow {
         _;
     }
 
+    modifier onlyAdmin() {
+        require(admins[msg.sender], "Only admin can call this");
+        _;
+    }
+
     modifier paymentExists(uint256 _paymentId) {
         require(_paymentId < paymentCounter, "Payment does not exist");
         _;
@@ -111,6 +121,9 @@ contract DisputeEscrow {
         owner = msg.sender;
         resolver = msg.sender;
         paymentCounter = 0;
+        // Deployer is the initial admin
+        admins[msg.sender] = true;
+        emit AdminAdded(msg.sender);
     }
 
     /**
@@ -144,6 +157,7 @@ contract DisputeEscrow {
 
     /**
      * @dev Complete a payment and release funds to receiver
+     * Only the sender can complete the payment before the 14-day timelock expires
      * @param _paymentId The ID of the payment to complete
      */
     function completePayment(uint256 _paymentId)
@@ -151,17 +165,43 @@ contract DisputeEscrow {
         paymentExists(_paymentId)
     {
         Payment storage payment = payments[_paymentId];
-        require(
-            msg.sender == payment.sender || msg.sender == payment.receiver,
-            "Not authorized"
-        );
+        require(msg.sender == payment.sender, "Only sender can complete payment");
         require(payment.status == PaymentStatus.Pending, "Payment is not pending");
+        require(
+            block.timestamp < payment.timestamp + RECEIVER_CLAIM_DELAY,
+            "Use claimPayment after 14 days"
+        );
 
         payment.status = PaymentStatus.Completed;
 
         (bool success, ) = payment.receiver.call{value: payment.amount}("");
         require(success, "Transfer failed");
 
+        emit PaymentCompleted(_paymentId, block.timestamp);
+    }
+
+    /**
+     * @dev Claim a payment after 14 days (receiver only)
+     * @param _paymentId The ID of the payment to claim
+     */
+    function claimPayment(uint256 _paymentId)
+        external
+        paymentExists(_paymentId)
+    {
+        Payment storage payment = payments[_paymentId];
+        require(msg.sender == payment.receiver, "Only receiver can claim payment");
+        require(payment.status == PaymentStatus.Pending, "Payment is not pending");
+        require(
+            block.timestamp >= payment.timestamp + RECEIVER_CLAIM_DELAY,
+            "14-day timelock has not expired"
+        );
+
+        payment.status = PaymentStatus.Completed;
+
+        (bool success, ) = payment.receiver.call{value: payment.amount}("");
+        require(success, "Transfer failed");
+
+        emit PaymentClaimed(_paymentId, payment.receiver, block.timestamp);
         emit PaymentCompleted(_paymentId, block.timestamp);
     }
 
@@ -199,7 +239,7 @@ contract DisputeEscrow {
      */
     function resolveDispute(uint256 _paymentId, bool _approve)
         public
-        onlyResolver
+        onlyAdmin
         paymentExists(_paymentId)
     {
         Payment storage payment = payments[_paymentId];
@@ -226,7 +266,7 @@ contract DisputeEscrow {
      */
     function batchResolve(uint256[] calldata _paymentIds, bool[] calldata _approvals)
         external
-        onlyResolver
+        onlyAdmin
     {
         require(_paymentIds.length == _approvals.length, "Array length mismatch");
         require(_paymentIds.length > 0, "Empty arrays");
@@ -268,6 +308,38 @@ contract DisputeEscrow {
         address oldResolver = resolver;
         resolver = _newResolver;
         emit ResolverUpdated(oldResolver, _newResolver);
+    }
+
+    /**
+     * @dev Add an admin to the whitelist (only existing admins can add)
+     * @param _admin The address to add as admin
+     */
+    function addAdmin(address _admin) external onlyAdmin {
+        require(_admin != address(0), "Invalid admin address");
+        require(!admins[_admin], "Address is already an admin");
+        admins[_admin] = true;
+        emit AdminAdded(_admin);
+    }
+
+    /**
+     * @dev Remove an admin from the whitelist (only existing admins can remove)
+     * @param _admin The address to remove from admins
+     */
+    function removeAdmin(address _admin) external onlyAdmin {
+        require(_admin != address(0), "Invalid admin address");
+        require(admins[_admin], "Address is not an admin");
+        require(_admin != owner, "Cannot remove owner from admins");
+        admins[_admin] = false;
+        emit AdminRemoved(_admin);
+    }
+
+    /**
+     * @dev Check if an address is an admin
+     * @param _address The address to check
+     * @return True if the address is an admin
+     */
+    function isAdmin(address _address) external view returns (bool) {
+        return admins[_address];
     }
 
     /**
