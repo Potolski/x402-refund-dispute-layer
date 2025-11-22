@@ -58,7 +58,7 @@ export default function Home() {
                 Secure escrow payments with dispute resolution
               </p>
             </div>
-            <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-3">
               <Link
                 href="/admin"
                 className="btn-secondary flex items-center gap-2 text-sm md:text-base"
@@ -67,9 +67,7 @@ export default function Home() {
                 <span className="hidden sm:inline">Admin Panel</span>
                 <span className="sm:hidden">Admin</span>
               </Link>
-              <div className="flex items-center">
-                <ConnectWallet />
-              </div>
+              <ConnectWallet />
             </div>
           </div>
         </div>
