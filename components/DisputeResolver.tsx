@@ -28,98 +28,41 @@ export function DisputeResolver({ payment, onSuccess }: DisputeResolverProps) {
   });
   const { resolveDispute, isPending } = useResolveDispute();
 
-  // Simulated AI analysis
+  // Real AI analysis using Groq (with fallback to rule-based)
   useEffect(() => {
     setAiAnalysis({ isAnalyzing: true, suggestion: null, confidence: 0, reasoning: [] });
 
-    const timer = setTimeout(() => {
-      const reason = payment.disputeReason.toLowerCase();
-      let suggestion: "approve" | "reject" = "reject";
-      let confidence = 50;
-      let reasoning: string[] = [];
+    const runAnalysis = async () => {
+      try {
+        const { analyzeDispute } = await import("@/lib/ai/groqAnalysis");
+        const result = await analyzeDispute(
+          formatEther(payment.amount),
+          payment.disputeReason,
+          payment.evidence,
+          payment.sender,
+          payment.receiver
+        );
 
-      // Simple rule-based "AI" logic
-      if (
-        reason.includes("never shipped") ||
-        reason.includes("not received") ||
-        reason.includes("didn't arrive")
-      ) {
-        suggestion = "approve";
-        confidence = 85;
-        reasoning = [
-          "Delivery issue detected - common valid refund reason",
-          "No delivery confirmation evidence provided by merchant",
-          "Customer claim appears legitimate based on pattern analysis",
-        ];
-      } else if (
-        reason.includes("defective") ||
-        reason.includes("broken") ||
-        reason.includes("damaged")
-      ) {
-        suggestion = "approve";
-        confidence = 75;
-        reasoning = [
-          "Product quality issue reported",
-          "Defect claims typically valid with evidence",
-          "Recommend approval to maintain customer trust",
-        ];
-      } else if (
-        reason.includes("wrong") ||
-        reason.includes("incorrect") ||
-        reason.includes("different")
-      ) {
-        suggestion = "approve";
-        confidence = 80;
-        reasoning = [
-          "Item mismatch reported",
-          "Wrong item shipments are clear merchant errors",
-          "Strong case for refund approval",
-        ];
-      } else if (
-        reason.includes("changed mind") ||
-        reason.includes("don't want") ||
-        reason.includes("dont want")
-      ) {
-        suggestion = "reject";
-        confidence = 70;
-        reasoning = [
-          "Buyer's remorse detected - not a valid refund reason",
-          "No merchant fault identified",
-          "Recommend rejection unless return policy allows",
-        ];
-      } else if (
-        reason.includes("duplicate") ||
-        reason.includes("double") ||
-        reason.includes("charged twice")
-      ) {
-        suggestion = "approve";
-        confidence = 90;
-        reasoning = [
-          "Duplicate payment detected - clear system error",
-          "Strong evidence of technical issue",
-          "Immediate refund recommended",
-        ];
-      } else {
-        // Random decision for other cases
-        suggestion = Math.random() > 0.5 ? "approve" : "reject";
-        confidence = Math.floor(Math.random() * 30) + 50;
-        reasoning = [
-          "Analyzing transaction history and user reputation...",
-          "Cross-referencing with similar dispute cases...",
-          `Confidence level: ${confidence}% based on available data`,
-        ];
+        setAiAnalysis({
+          isAnalyzing: false,
+          suggestion: result.suggestion,
+          confidence: Math.round(result.confidence * 100),
+          reasoning: [result.reasoning, ...result.factors],
+        });
+      } catch (error) {
+        console.error("AI analysis error:", error);
+        // Fallback to basic analysis
+        setAiAnalysis({
+          isAnalyzing: false,
+          suggestion: "reject",
+          confidence: 50,
+          reasoning: ["Analysis failed. Manual review recommended."],
+        });
       }
+    };
 
-      setAiAnalysis({
-        isAnalyzing: false,
-        suggestion,
-        confidence,
-        reasoning,
-      });
-    }, 2000); // Simulate 2 second analysis
-
-    return () => clearTimeout(timer);
-  }, [payment.disputeReason]);
+    runAnalysis();
+  }, [payment.disputeReason, payment.amount, payment.evidence, payment.sender, payment.receiver]);
 
   const handleResolve = async () => {
     if (selected === null) {

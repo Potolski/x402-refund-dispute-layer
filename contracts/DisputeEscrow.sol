@@ -2,8 +2,24 @@
 pragma solidity ^0.8.24;
 
 /**
- * @title DisputeEscrow
- * @dev Escrow contract for x402 payments with refund and dispute resolution capabilities
+ * @title DisputeEscrow - x402 Refund & Dispute Layer Extension
+ * @dev Escrow contract that extends the x402 payment protocol with refund and dispute capabilities
+ * 
+ * HOW THIS EXTENDS x402:
+ * - x402 enables payment intents (programmable payments)
+ * - This contract adds the missing "refund & dispute" layer
+ * - Payments are held in escrow with dispute resolution mechanisms
+ * - Supports AI-powered decision making for fair dispute outcomes
+ * - Provides batch operations for scalability
+ * 
+ * KEY EXTENSIONS:
+ * 1. Escrow Security: Holds x402 payments until confirmed or disputed
+ * 2. Refund Management: Request/process refunds with evidence
+ * 3. Dispute Window: 14-day protection period for buyers
+ * 4. AI Integration: Off-chain AI agents suggest dispute resolutions
+ * 5. Batch Processing: Resolve multiple disputes efficiently
+ * 
+ * Built for Polygon Network
  */
 contract DisputeEscrow {
     enum PaymentStatus {
