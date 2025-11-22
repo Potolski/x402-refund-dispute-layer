@@ -37,13 +37,38 @@ describe("DisputeEscrow", function () {
 
   describe("Create Payment", function () {
     it("Should create a payment successfully", async function () {
-      await expect(
-        disputeEscrow.connect(sender).createPayment(receiver.address, {
-          value: PAYMENT_AMOUNT,
-        })
-      )
-        .to.emit(disputeEscrow, "PaymentCreated")
-        .withArgs(0, sender.address, receiver.address, PAYMENT_AMOUNT, await time.latest() + 1);
+      const beforeTimestamp = await time.latest();
+      
+      const tx = await disputeEscrow.connect(sender).createPayment(receiver.address, {
+        value: PAYMENT_AMOUNT,
+      });
+      
+      const receipt = await tx.wait();
+      const afterTimestamp = await time.latest();
+      
+      // Check event was emitted with correct parameters (allow timestamp variance)
+      const event = receipt?.logs.find(
+        (log: any) => {
+          try {
+            const parsed = disputeEscrow.interface.parseLog(log);
+            return parsed?.name === "PaymentCreated";
+          } catch {
+            return false;
+          }
+        }
+      );
+      
+      expect(event).to.not.be.undefined;
+      const parsedEvent = disputeEscrow.interface.parseLog(event!);
+      expect(parsedEvent?.args[0]).to.equal(0); // paymentId
+      expect(parsedEvent?.args[1]).to.equal(sender.address); // sender
+      expect(parsedEvent?.args[2]).to.equal(receiver.address); // receiver
+      expect(parsedEvent?.args[3]).to.equal(PAYMENT_AMOUNT); // amount
+      
+      // Timestamp should be within the block time range
+      const eventTimestamp = Number(parsedEvent?.args[4]);
+      expect(eventTimestamp).to.be.at.least(beforeTimestamp);
+      expect(eventTimestamp).to.be.at.most(afterTimestamp + 1);
 
       const payment = await disputeEscrow.getPayment(0);
       expect(payment.sender).to.equal(sender.address);

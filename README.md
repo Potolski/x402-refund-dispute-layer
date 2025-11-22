@@ -41,13 +41,22 @@ A secure escrow and dispute resolution system extending the x402 payment protoco
 - **Real-time Updates**: Live payment status tracking
 
 ### Technical Features
-- Built with **Hardhat** for smart contract development
+- **Hardhat Infrastructure**: Comprehensive Hardhat setup with gas reporting, coverage, custom tasks, network forking, and more
 - Deployed on **Polygon Amoy Testnet**
 - Modern Next.js 14 frontend with App Router
 - Web3 integration with wagmi v2 and RainbowKit
 - **Real AI Integration**: Uses Groq API for intelligent dispute analysis (with rule-based fallback)
 - Comprehensive smart contract tests (>80% coverage)
 - Batch operations for gas efficiency
+
+### Hardhat Features
+- **Gas Reporter**: Track and optimize gas usage
+- **Code Coverage**: Comprehensive test coverage reporting
+- **Custom Tasks**: Powerful CLI tools for contract interaction
+- **Network Forking**: Test against real Polygon Amoy state
+- **Hardhat Console**: Interactive contract interaction
+- **Sourcify Verification**: Automatic source code verification
+- **Hardhat Ignition**: Advanced deployment system structure
 
 ## Architecture
 
@@ -123,17 +132,48 @@ npm run compile
 npm run test
 ```
 
-3. **Deploy to Polygon Amoy**
+3. **Run tests with gas reporting** (optional)
+```bash
+npm run test:gas
+```
+
+4. **Generate coverage report** (optional)
+```bash
+npm run test:coverage
+```
+
+5. **Deploy to Polygon Amoy**
 ```bash
 npm run deploy
 ```
 
-4. **Verify on PolygonScan**
+6. **Verify on PolygonScan**
 ```bash
 npm run verify -- <CONTRACT_ADDRESS>
 ```
 
-5. **Update .env** with the deployed contract address
+### Hardhat Custom Tasks
+
+Interact with deployed contracts using custom Hardhat tasks:
+
+```bash
+# Get contract information (use --network polygonAmoy for deployed contracts)
+npx hardhat contract:info --address <CONTRACT_ADDRESS> --network polygonAmoy
+
+# List all payments
+npx hardhat contract:payments --address <CONTRACT_ADDRESS> --network polygonAmoy
+
+# Get specific payment
+npx hardhat contract:payment --address <CONTRACT_ADDRESS> --id <PAYMENT_ID> --network polygonAmoy
+
+# Check contract balance
+npx hardhat contract:balance --address <CONTRACT_ADDRESS> --network polygonAmoy
+```
+
+**Important:** Always specify `--network polygonAmoy` when querying deployed contracts. The tasks include automatic network validation and helpful error messages.
+
+
+1. **Update .env** with the deployed contract address
 
 ### Run Frontend
 
