@@ -18,7 +18,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       case PaymentStatus.Refunded:
         return { label: "Refunded", className: "badge-refunded" };
       case PaymentStatus.Rejected:
-        return { label: "Rejected", className: "badge-rejected" };
+        return { label: "Refund Denied", className: "badge-rejected" };
       default:
         return { label: "Unknown", className: "badge" };
     }

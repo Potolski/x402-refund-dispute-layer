@@ -8,38 +8,24 @@ import { DisputeCardSkeleton } from "@/components/LoadingSkeleton";
 import { usePaymentsByStatus } from "@/lib/hooks/usePayments";
 import { useToast } from "@/lib/hooks/useToast";
 import { PaymentStatus } from "@/lib/types";
-import { useAccount, useReadContract } from "wagmi";
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/config/contracts";
+import { useAccount } from "wagmi";
 import Link from "next/link";
 import { useState } from "react";
 import { useResolveDispute } from "@/lib/hooks/useResolveDispute";
+import { useIsAdmin } from "@/lib/hooks/useIsAdmin";
+import { MdRefresh } from "react-icons/md";
 
 export default function AdminPage() {
   const { address, isConnected } = useAccount();
-  const { payments: disputedPayments, isLoading, error } = usePaymentsByStatus(
+  const { payments: disputedPayments, isLoading, error, refetch } = usePaymentsByStatus(
     PaymentStatus.Disputed
   );
   const [selectedPayments, setSelectedPayments] = useState<Set<string>>(new Set());
   const { batchResolve, isPending: isBatchPending } = useResolveDispute();
   const { toasts, removeToast, success, error: errorToast, info } = useToast();
 
-  // Check if user is owner or resolver
-  const { data: owner } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
-    functionName: "owner",
-  });
-
-  const { data: resolver } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
-    functionName: "resolver",
-  });
-
-  const isAuthorized =
-    address &&
-    (address.toLowerCase() === (owner as string)?.toLowerCase() ||
-      address.toLowerCase() === (resolver as string)?.toLowerCase());
+  // Check if user is admin (whitelisted)
+  const { isAdmin: isAuthorized, isLoading: isCheckingAdmin } = useIsAdmin();
 
   const toggleSelection = (paymentId: string) => {
     const newSet = new Set(selectedPayments);
@@ -116,11 +102,17 @@ export default function AdminPage() {
             title="Admin Access Required"
             description="Connect your wallet to access the dispute resolution admin panel and manage payment disputes."
           />
+        ) : isCheckingAdmin ? (
+          <EmptyState
+            icon="lock"
+            title="Checking Admin Status"
+            description="Verifying your admin access..."
+          />
         ) : !isAuthorized ? (
           <EmptyState
             icon="error"
             title="Unauthorized Access"
-            description={`You are not authorized to access the admin panel. Connected as: ${address?.slice(0, 6)}...${address?.slice(-4)}`}
+            description={`You are not authorized to access the admin panel. Only whitelisted admin addresses can access this page. Connected as: ${address?.slice(0, 6)}...${address?.slice(-4)}`}
           />
         ) : (
           <>
@@ -147,9 +139,7 @@ export default function AdminPage() {
                   Your Role
                 </div>
                 <div className="text-lg font-bold text-purple-900 mt-2">
-                  {address?.toLowerCase() === (owner as string)?.toLowerCase()
-                    ? "Owner & Resolver"
-                    : "Resolver"}
+                  Admin
                 </div>
               </div>
             </div>
@@ -217,22 +207,35 @@ export default function AdminPage() {
                   <h2 className="text-xl font-bold text-gray-800">
                     Disputed Payments
                   </h2>
-                  <button
-                    onClick={() => {
-                      if (selectedPayments.size === disputedPayments.length) {
-                        setSelectedPayments(new Set());
-                      } else {
-                        setSelectedPayments(
-                          new Set(disputedPayments.map((p) => p.id.toString()))
-                        );
-                      }
-                    }}
-                    className="btn-secondary text-sm w-full sm:w-auto"
-                  >
-                    {selectedPayments.size === disputedPayments.length
-                      ? "Deselect All"
-                      : "Select All"}
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={() => {
+                        refetch();
+                        info("Refreshing disputes...");
+                      }}
+                      disabled={isLoading}
+                      className="btn-secondary flex items-center justify-center gap-2 text-sm"
+                    >
+                      <MdRefresh className={`text-lg ${isLoading ? "animate-spin" : ""}`} />
+                      Refresh
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (selectedPayments.size === disputedPayments.length) {
+                          setSelectedPayments(new Set());
+                        } else {
+                          setSelectedPayments(
+                            new Set(disputedPayments.map((p) => p.id.toString()))
+                          );
+                        }
+                      }}
+                      className="btn-secondary text-sm"
+                    >
+                      {selectedPayments.size === disputedPayments.length
+                        ? "Deselect All"
+                        : "Select All"}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">

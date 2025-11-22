@@ -37,7 +37,7 @@ export function PaymentTimeline({ payment }: PaymentTimelineProps) {
       case PaymentStatus.Refunded:
         return { label: "Refunded", icon: <MdUndo className="text-xl" />, color: "bg-blue-500" };
       case PaymentStatus.Rejected:
-        return { label: "Rejected", icon: <MdCancel className="text-xl" />, color: "bg-red-500" };
+        return { label: "Refund Denied", icon: <MdCancel className="text-xl" />, color: "bg-red-500" };
       case PaymentStatus.Disputed:
         return { label: "Disputed", icon: <MdGavel className="text-xl" />, color: "bg-orange-500" };
       default:
@@ -141,6 +141,18 @@ export function PaymentTimeline({ payment }: PaymentTimelineProps) {
             <p className="text-sm text-orange-800 flex items-center gap-2">
               <MdGavel className="text-lg flex-shrink-0" />
               This payment is under review. An admin will resolve the dispute soon.
+            </p>
+          </div>
+        )}
+
+        {/* Rejected Status Message */}
+        {payment.status === PaymentStatus.Rejected && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-800 font-semibold mb-1">
+              Refund Request Denied
+            </p>
+            <p className="text-sm text-red-700">
+              The sender's refund request was denied by an admin. Payment has been released to the receiver.
             </p>
           </div>
         )}

@@ -33,6 +33,10 @@ describe("DisputeEscrow", function () {
     it("Should initialize payment counter to 0", async function () {
       expect(await disputeEscrow.paymentCounter()).to.equal(0);
     });
+
+    it("Should set deployer as admin initially", async function () {
+      expect(await disputeEscrow.isAdmin(owner.address)).to.be.true;
+    });
   });
 
   describe("Create Payment", function () {
@@ -151,14 +155,77 @@ describe("DisputeEscrow", function () {
       expect(payment.status).to.equal(1); // Completed
     });
 
-    it("Should allow receiver to complete payment", async function () {
-      await expect(disputeEscrow.connect(receiver).completePayment(0)).to.not.be.reverted;
+    it("Should revert if receiver tries to complete before 14 days", async function () {
+      await expect(
+        disputeEscrow.connect(receiver).completePayment(0)
+      ).to.be.revertedWith("Only sender can complete payment");
     });
 
     it("Should revert if unauthorized user tries to complete", async function () {
       await expect(
         disputeEscrow.connect(resolver).completePayment(0)
-      ).to.be.revertedWith("Not authorized");
+      ).to.be.revertedWith("Only sender can complete payment");
+    });
+
+    it("Should revert if sender tries to complete after 14 days", async function () {
+      // Fast forward 15 days
+      await time.increase(15 * 24 * 60 * 60);
+      
+      await expect(
+        disputeEscrow.connect(sender).completePayment(0)
+      ).to.be.revertedWith("Use claimPayment after 14 days");
+    });
+
+    it("Should allow receiver to claim payment after 14 days", async function () {
+      // Fast forward 15 days
+      await time.increase(15 * 24 * 60 * 60);
+      
+      const receiverBalanceBefore = await ethers.provider.getBalance(receiver.address);
+      const beforeTimestamp = await time.latest();
+
+      const tx = await disputeEscrow.connect(receiver).claimPayment(0);
+      const receipt = await tx.wait();
+      const gasUsed = receipt!.gasUsed * receipt!.gasPrice;
+      const afterTimestamp = await time.latest();
+
+      // Check event was emitted with correct parameters (allow timestamp variance)
+      const event = receipt?.logs.find(
+        (log: any) => log.fragment?.name === "PaymentClaimed"
+      );
+      expect(event).to.not.be.undefined;
+      
+      // Decode event
+      const decodedEvent = disputeEscrow.interface.parseLog({
+        topics: event!.topics as string[],
+        data: event!.data,
+      });
+      expect(decodedEvent?.args[0]).to.equal(0);
+      expect(decodedEvent?.args[1]).to.equal(receiver.address);
+      // Check timestamp is within range
+      expect(decodedEvent?.args[2]).to.be.at.least(beforeTimestamp);
+      expect(decodedEvent?.args[2]).to.be.at.most(afterTimestamp + 1);
+
+      const receiverBalanceAfter = await ethers.provider.getBalance(receiver.address);
+      // Account for gas costs
+      expect(receiverBalanceAfter - receiverBalanceBefore + gasUsed).to.equal(PAYMENT_AMOUNT);
+
+      const payment = await disputeEscrow.getPayment(0);
+      expect(payment.status).to.equal(1); // Completed
+    });
+
+    it("Should revert if receiver tries to claim before 14 days", async function () {
+      await expect(
+        disputeEscrow.connect(receiver).claimPayment(0)
+      ).to.be.revertedWith("14-day timelock has not expired");
+    });
+
+    it("Should revert if sender tries to claim payment", async function () {
+      // Fast forward 15 days
+      await time.increase(15 * 24 * 60 * 60);
+      
+      await expect(
+        disputeEscrow.connect(sender).claimPayment(0)
+      ).to.be.revertedWith("Only receiver can claim payment");
     });
 
     it("Should revert if payment is not pending", async function () {
@@ -262,10 +329,10 @@ describe("DisputeEscrow", function () {
       expect(receiverBalanceAfter - receiverBalanceBefore).to.equal(PAYMENT_AMOUNT);
     });
 
-    it("Should revert if non-resolver tries to resolve", async function () {
+    it("Should revert if non-admin tries to resolve", async function () {
       await expect(
         disputeEscrow.connect(sender).resolveDispute(0, true)
-      ).to.be.revertedWith("Only resolver can call this");
+      ).to.be.revertedWith("Only admin can call this");
     });
 
     it("Should revert if payment is not disputed", async function () {
@@ -315,10 +382,10 @@ describe("DisputeEscrow", function () {
       ).to.be.revertedWith("Empty arrays");
     });
 
-    it("Should revert if non-resolver tries to batch resolve", async function () {
+    it("Should revert if non-admin tries to batch resolve", async function () {
       await expect(
         disputeEscrow.connect(sender).batchResolve([0], [true])
-      ).to.be.revertedWith("Only resolver can call this");
+      ).to.be.revertedWith("Only admin can call this");
     });
   });
 
@@ -420,6 +487,78 @@ describe("DisputeEscrow", function () {
     it("Should get receiver payments", async function () {
       const receiverPayments = await disputeEscrow.getReceiverPayments(receiver.address);
       expect(receiverPayments).to.have.lengthOf(2);
+    });
+  });
+
+  describe("Admin Whitelist", function () {
+    it("Should allow admin to add another admin", async function () {
+      await expect(disputeEscrow.connect(owner).addAdmin(resolver.address))
+        .to.emit(disputeEscrow, "AdminAdded")
+        .withArgs(resolver.address);
+
+      expect(await disputeEscrow.isAdmin(resolver.address)).to.be.true;
+    });
+
+    it("Should allow admin to remove another admin", async function () {
+      // First add resolver as admin
+      await disputeEscrow.connect(owner).addAdmin(resolver.address);
+      
+      await expect(disputeEscrow.connect(owner).removeAdmin(resolver.address))
+        .to.emit(disputeEscrow, "AdminRemoved")
+        .withArgs(resolver.address);
+
+      expect(await disputeEscrow.isAdmin(resolver.address)).to.be.false;
+    });
+
+    it("Should revert if non-admin tries to add admin", async function () {
+      await expect(
+        disputeEscrow.connect(sender).addAdmin(resolver.address)
+      ).to.be.revertedWith("Only admin can call this");
+    });
+
+    it("Should revert if non-admin tries to remove admin", async function () {
+      await expect(
+        disputeEscrow.connect(sender).removeAdmin(owner.address)
+      ).to.be.revertedWith("Only admin can call this");
+    });
+
+    it("Should revert if trying to add zero address as admin", async function () {
+      await expect(
+        disputeEscrow.connect(owner).addAdmin(ethers.ZeroAddress)
+      ).to.be.revertedWith("Invalid admin address");
+    });
+
+    it("Should revert if trying to remove owner from admins", async function () {
+      await expect(
+        disputeEscrow.connect(owner).removeAdmin(owner.address)
+      ).to.be.revertedWith("Cannot remove owner from admins");
+    });
+
+    it("Should revert if trying to add already existing admin", async function () {
+      await expect(
+        disputeEscrow.connect(owner).addAdmin(owner.address)
+      ).to.be.revertedWith("Address is already an admin");
+    });
+
+    it("Should revert if trying to remove non-admin", async function () {
+      await expect(
+        disputeEscrow.connect(owner).removeAdmin(sender.address)
+      ).to.be.revertedWith("Address is not an admin");
+    });
+
+    it("Should allow new admin to resolve disputes", async function () {
+      // Add resolver as admin
+      await disputeEscrow.connect(owner).addAdmin(resolver.address);
+      
+      // Create and dispute a payment
+      await disputeEscrow.connect(sender).createPayment(receiver.address, {
+        value: PAYMENT_AMOUNT,
+      });
+      await disputeEscrow.connect(sender).requestRefund(0, "Test dispute", "");
+
+      // New admin should be able to resolve
+      await expect(disputeEscrow.connect(resolver).resolveDispute(0, true))
+        .to.emit(disputeEscrow, "DisputeResolved");
     });
   });
 });

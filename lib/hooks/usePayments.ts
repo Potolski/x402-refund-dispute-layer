@@ -69,7 +69,7 @@ export function usePayments() {
 }
 
 export function usePaymentsByStatus(status: number) {
-  const { data, isLoading, error } = useReadContract({
+  const { data, isLoading, error, refetch } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "getPaymentsByStatus",
@@ -82,6 +82,7 @@ export function usePaymentsByStatus(status: number) {
     payments,
     isLoading,
     error,
+    refetch,
   };
 }
 

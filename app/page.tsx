@@ -16,6 +16,7 @@ import { useAccount } from "wagmi";
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { MdRefresh, MdAdminPanelSettings } from "react-icons/md";
+import { useIsAdmin } from "@/lib/hooks/useIsAdmin";
 
 export default function Home() {
   const { isConnected, address } = useAccount();
@@ -23,6 +24,7 @@ export default function Home() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [demoEnabled, setDemoEnabled] = useState(false);
   const { toasts, removeToast, success, error, info } = useToast();
+  const { isAdmin } = useIsAdmin();
 
   useEffect(() => {
     setDemoEnabled(isDemoMode());
@@ -59,14 +61,16 @@ export default function Home() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Link
-                href="/admin"
-                className="btn-secondary flex items-center gap-2 text-sm md:text-base"
-              >
-                <MdAdminPanelSettings className="text-lg md:text-xl" />
-                <span className="hidden sm:inline">Admin Panel</span>
-                <span className="sm:hidden">Admin</span>
-              </Link>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="btn-secondary flex items-center gap-2 text-sm md:text-base"
+                >
+                  <MdAdminPanelSettings className="text-lg md:text-xl" />
+                  <span className="hidden sm:inline">Admin Panel</span>
+                  <span className="sm:hidden">Admin</span>
+                </Link>
+              )}
               <ConnectWallet />
             </div>
           </div>

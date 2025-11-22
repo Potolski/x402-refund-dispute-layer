@@ -9,6 +9,7 @@ import { useState } from "react";
 import { RefundModal } from "./RefundModal";
 import { useAccount } from "wagmi";
 import { useCompletePayment } from "@/lib/hooks/useCompletePayment";
+import { useClaimPayment } from "@/lib/hooks/useClaimPayment";
 import { MdExpandMore, MdExpandLess, MdInfo } from "react-icons/md";
 
 interface PaymentCardProps {
@@ -23,9 +24,15 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
   const [showTimeline, setShowTimeline] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const { completePayment, isPending: isCompleting } = useCompletePayment();
+  const { claimPayment, isPending: isClaiming } = useClaimPayment();
 
   const isSender = address?.toLowerCase() === payment.sender.toLowerCase();
   const isReceiver = address?.toLowerCase() === payment.receiver.toLowerCase();
+  
+  // Check if 14 days have passed (RECEIVER_CLAIM_DELAY = 14 days = 1209600 seconds)
+  const RECEIVER_CLAIM_DELAY = BigInt(14 * 24 * 60 * 60);
+  const currentTimestamp = BigInt(Math.floor(Date.now() / 1000));
+  const canReceiverClaim = currentTimestamp >= payment.timestamp + RECEIVER_CLAIM_DELAY;
 
   const formatDate = (timestamp: bigint) => {
     return new Date(Number(timestamp) * 1000).toLocaleString();
@@ -47,10 +54,25 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
     }
   };
 
+  const handleClaim = async () => {
+    try {
+      if (onToast) onToast("Claiming payment...", "info");
+      await claimPayment(payment.id);
+      if (onToast) onToast("Payment claimed successfully!", "success");
+      if (onRefetch) onRefetch();
+    } catch (error) {
+      console.error("Error claiming payment:", error);
+      if (onToast) onToast("Failed to claim payment", "error");
+    }
+  };
+
   const canRequestRefund =
     isSender && payment.status === PaymentStatus.Pending;
-  const canComplete =
-    (isSender || isReceiver) && payment.status === PaymentStatus.Pending;
+  // Sender can complete before 14 days, receiver can claim after 14 days
+  const canSenderComplete =
+    isSender && payment.status === PaymentStatus.Pending && !canReceiverClaim;
+  const canReceiverClaimPayment =
+    isReceiver && payment.status === PaymentStatus.Pending && canReceiverClaim;
 
   return (
     <>
@@ -119,6 +141,31 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
               )}
             </div>
           )}
+
+          {payment.status === PaymentStatus.Rejected && (
+            <div className="pt-3 border-t">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800 font-semibold mb-1">
+                  Refund Request Denied
+                </p>
+                {isSender && (
+                  <p className="text-sm text-red-700">
+                    Your refund request was denied by the admin. The payment has been released to the receiver.
+                  </p>
+                )}
+                {isReceiver && (
+                  <p className="text-sm text-green-700 font-medium">
+                    ✓ The sender's refund request was denied. Payment has been released to you.
+                  </p>
+                )}
+                {!isSender && !isReceiver && (
+                  <p className="text-sm text-red-700">
+                    The refund request was denied. Payment has been released to the receiver.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Timeline Toggle */}
@@ -145,7 +192,7 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
               Request Refund
             </button>
           )}
-          {canComplete && (
+          {canSenderComplete && (
             <button
               onClick={handleComplete}
               disabled={isCompleting}
@@ -153,6 +200,20 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
             >
               {isCompleting ? "Processing..." : "Complete Payment"}
             </button>
+          )}
+          {canReceiverClaimPayment && (
+            <button
+              onClick={handleClaim}
+              disabled={isClaiming}
+              className="btn-success flex-1 text-sm md:text-base"
+            >
+              {isClaiming ? "Processing..." : "Claim Payment"}
+            </button>
+          )}
+          {isReceiver && payment.status === PaymentStatus.Pending && !canReceiverClaim && (
+            <div className="text-sm text-gray-600 italic text-center py-2">
+              You can claim this payment after 14 days from creation
+            </div>
           )}
         </div>
       </div>
