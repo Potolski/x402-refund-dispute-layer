@@ -1,8 +1,12 @@
 "use client";
 
-import { MdSecurity, MdGavel, MdSpeed, MdVerified } from "react-icons/md";
+import { MdSecurity, MdGavel, MdSpeed, MdVerified, MdOpenInNew } from "react-icons/md";
+import { CONTRACT_ADDRESS } from "@/lib/config/contracts";
 
 export function HeroSection() {
+  const polygonScanUrl = `https://amoy.polygonscan.com/address/${CONTRACT_ADDRESS}`;
+  
+  const isValidAddress = CONTRACT_ADDRESS !== "0x0000000000000000000000000000000000000000";
   return (
     <div className="bg-gradient-to-br from-primary via-purple-600 to-secondary text-white py-16 px-4 rounded-2xl mb-8 shadow-2xl">
       <div className="max-w-4xl mx-auto text-center">
@@ -21,6 +25,19 @@ export function HeroSection() {
           Extending the x402 payment protocol with escrow security and AI-powered dispute resolution. 
           The missing refund layer for crypto commerce.
         </p>
+
+        {isValidAddress && (
+          <a
+            href={polygonScanUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-white text-primary px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-colors shadow-lg hover:shadow-xl"
+          >
+            <MdVerified className="text-xl" />
+            <span>View Smart Contract on PolygonScan</span>
+            <MdOpenInNew className="text-lg" />
+          </a>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
