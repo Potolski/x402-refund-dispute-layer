@@ -27,7 +27,7 @@ A secure escrow and dispute resolution system extending the x402 payment protoco
 ## Links
 
 - [**Live Demo**](https://x402-refund-dispute-layer.vercel.app/)
-- **Video Demo**: [TODO]
+- [**Video Demo**](https://www.youtube.com/watch?v=bX1IUekaSOI)
 - [**Smart Contract (PolygonScan)**](https://amoy.polygonscan.com/address/0x6082b2d43A2Eefb9D7B6362F0EF48543F3CBF25b#code)
 
 ## Features
