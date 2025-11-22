@@ -3,9 +3,9 @@
 import { Payment, PaymentStatus } from "@/lib/types";
 import { PaymentCard } from "./PaymentCard";
 import { PaymentListSkeleton } from "./LoadingSkeleton";
+import { EmptyState } from "./EmptyState";
 import { useState } from "react";
 import { useAccount } from "wagmi";
-import { MdInbox } from "react-icons/md";
 
 interface PaymentListProps {
   payments: Payment[];
@@ -26,15 +26,11 @@ export function PaymentList({ payments, isLoading, onRefetch, onToast }: Payment
 
   if (!payments || payments.length === 0) {
     return (
-      <div className="text-center py-12">
-        <MdInbox className="text-6xl text-gray-300 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">
-          No payments yet
-        </h3>
-        <p className="text-gray-500">
-          Create your first escrowed payment to get started
-        </p>
-      </div>
+      <EmptyState
+        icon="inbox"
+        title="No Payments Yet"
+        description="Create your first escrowed payment to experience secure crypto transactions with refund protection."
+      />
     );
   }
 
@@ -104,9 +100,11 @@ export function PaymentList({ payments, isLoading, onRefetch, onToast }: Payment
       </div>
 
       {sortedPayments.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          No payments found for this filter
-        </div>
+        <EmptyState
+          icon="inbox"
+          title="No Payments Found"
+          description="No payments match your current filter. Try selecting a different filter option."
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedPayments.map((payment) => (

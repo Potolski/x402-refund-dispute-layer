@@ -3,13 +3,15 @@
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { PaymentList } from "@/components/PaymentList";
 import { CreatePaymentForm } from "@/components/CreatePaymentForm";
+import { HeroSection } from "@/components/HeroSection";
+import { EmptyState } from "@/components/EmptyState";
 import { ToastContainer } from "@/components/Toast";
 import { usePayments } from "@/lib/hooks/usePayments";
 import { useToast } from "@/lib/hooks/useToast";
 import { useAccount } from "wagmi";
 import { useState } from "react";
 import Link from "next/link";
-import { MdLock, MdRefresh } from "react-icons/md";
+import { MdRefresh } from "react-icons/md";
 
 export default function Home() {
   const { isConnected } = useAccount();
@@ -47,21 +49,23 @@ export default function Home() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {!isConnected ? (
-          <div className="text-center py-20">
-            <MdLock className="text-6xl text-primary mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
-              Welcome to x402 Refund & Dispute Layer
-            </h2>
-            <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-              A secure escrow system for crypto payments with built-in refund and
-              dispute resolution. Connect your wallet to get started.
-            </p>
-            <div className="flex justify-center">
-              <ConnectWallet />
-            </div>
-          </div>
+          <>
+            <HeroSection />
+            <EmptyState
+              icon="lock"
+              title="Connect Your Wallet"
+              description="Connect your wallet to create secure escrowed payments, request refunds, and manage disputes with AI-powered resolution."
+              action={{
+                label: "Connect Wallet",
+                onClick: () => {}, // RainbowKit handles this automatically
+              }}
+            />
+          </>
         ) : (
           <>
+            {/* Hero Section for Connected Users */}
+            {!showCreateForm && payments.length === 0 && <HeroSection />}
+            
             {/* Action Buttons */}
             <div className="flex gap-4 mb-8">
               <button

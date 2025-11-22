@@ -3,12 +3,13 @@
 import { Payment, PaymentStatus } from "@/lib/types";
 import { StatusBadge } from "./StatusBadge";
 import { PaymentTimeline } from "./PaymentTimeline";
+import { PaymentDetailModal } from "./PaymentDetailModal";
 import { formatEther } from "viem";
 import { useState } from "react";
 import { RefundModal } from "./RefundModal";
 import { useAccount } from "wagmi";
 import { useCompletePayment } from "@/lib/hooks/useCompletePayment";
-import { MdExpandMore, MdExpandLess } from "react-icons/md";
+import { MdExpandMore, MdExpandLess, MdInfo } from "react-icons/md";
 
 interface PaymentCardProps {
   payment: Payment;
@@ -20,6 +21,7 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
   const { address } = useAccount();
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const { completePayment, isPending: isCompleting } = useCompletePayment();
 
   const isSender = address?.toLowerCase() === payment.sender.toLowerCase();
@@ -52,9 +54,9 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
 
   return (
     <>
-      <div className="card hover:shadow-lg transition-shadow">
+      <div className="card hover:shadow-lg transition-shadow relative">
         <div className="flex justify-between items-start mb-4">
-          <div>
+          <div className="flex-1">
             <h3 className="text-xl font-bold text-gray-800">
               Payment #{payment.id.toString()}
             </h3>
@@ -62,7 +64,16 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
               {formatDate(payment.timestamp)}
             </p>
           </div>
-          <StatusBadge status={payment.status} />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowDetailModal(true)}
+              className="text-primary hover:text-secondary transition-colors p-1"
+              title="View details"
+            >
+              <MdInfo className="text-2xl" />
+            </button>
+            <StatusBadge status={payment.status} />
+          </div>
         </div>
 
         <div className="space-y-3 mb-4">
@@ -155,6 +166,14 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
             if (onRefetch) onRefetch();
           }}
           onToast={onToast}
+        />
+      )}
+
+      {showDetailModal && (
+        <PaymentDetailModal
+          payment={payment}
+          onClose={() => setShowDetailModal(false)}
+          userAddress={address}
         />
       )}
     </>

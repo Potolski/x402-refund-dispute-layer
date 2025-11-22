@@ -2,6 +2,7 @@
 
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { DisputeResolver } from "@/components/DisputeResolver";
+import { EmptyState } from "@/components/EmptyState";
 import { ToastContainer } from "@/components/Toast";
 import { DisputeCardSkeleton } from "@/components/LoadingSkeleton";
 import { usePaymentsByStatus } from "@/lib/hooks/usePayments";
@@ -12,7 +13,6 @@ import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/config/contracts";
 import Link from "next/link";
 import { useState } from "react";
 import { useResolveDispute } from "@/lib/hooks/useResolveDispute";
-import { MdLock, MdBlock, MdCheckCircle, MdWarning } from "react-icons/md";
 
 export default function AdminPage() {
   const { address, isConnected } = useAccount();
@@ -111,37 +111,17 @@ export default function AdminPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {!isConnected ? (
-          <div className="text-center py-20">
-            <MdLock className="text-6xl text-primary mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
-              Admin Access Required
-            </h2>
-            <p className="text-gray-600 mb-8">
-              Connect your wallet to access the admin panel
-            </p>
-            <div className="flex justify-center">
-              <ConnectWallet />
-            </div>
-          </div>
+          <EmptyState
+            icon="lock"
+            title="Admin Access Required"
+            description="Connect your wallet to access the dispute resolution admin panel and manage payment disputes."
+          />
         ) : !isAuthorized ? (
-          <div className="text-center py-20">
-            <MdBlock className="text-6xl text-red-500 mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
-              Unauthorized Access
-            </h2>
-            <p className="text-gray-600 mb-4">
-              You are not authorized to access the admin panel.
-            </p>
-            <p className="text-sm text-gray-500">
-              Connected as: {address}
-            </p>
-            <p className="text-sm text-gray-500">
-              Contract Owner: {owner as string}
-            </p>
-            <p className="text-sm text-gray-500">
-              Resolver: {resolver as string}
-            </p>
-          </div>
+          <EmptyState
+            icon="error"
+            title="Unauthorized Access"
+            description={`You are not authorized to access the admin panel. Connected as: ${address?.slice(0, 6)}...${address?.slice(-4)}`}
+          />
         ) : (
           <>
             {/* Stats */}
@@ -220,23 +200,17 @@ export default function AdminPage() {
                 ))}
               </div>
             ) : error ? (
-              <div className="text-center py-20">
-                <MdWarning className="text-6xl text-orange-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                  Error Loading Disputes
-                </h3>
-                <p className="text-gray-500">{error.message}</p>
-              </div>
+              <EmptyState
+                icon="warning"
+                title="Error Loading Disputes"
+                description={`Unable to load disputed payments: ${error.message}`}
+              />
             ) : disputedPayments.length === 0 ? (
-              <div className="text-center py-20">
-                <MdCheckCircle className="text-6xl text-green-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                  No Pending Disputes
-                </h3>
-                <p className="text-gray-500">
-                  All disputes have been resolved. Great work!
-                </p>
-              </div>
+              <EmptyState
+                icon="success"
+                title="No Pending Disputes"
+                description="All disputes have been resolved. Great work! The system is running smoothly."
+              />
             ) : (
               <div>
                 <div className="flex justify-between items-center mb-6">
