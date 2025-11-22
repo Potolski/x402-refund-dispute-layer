@@ -2,7 +2,7 @@
 
 A secure escrow and dispute resolution system built on top of x402 payments for the Polygon network. This project provides a trust layer for crypto commerce by enabling refunds and automated dispute resolution.
 
-## 🎯 Project Overview
+## Project Overview
 
 **Problem:** Crypto payments are final — users can't request refunds. Disputes (e.g., seller never shipped, wrong product, duplicate payment) are difficult to resolve. Merchants and platforms need a trust layer to handle refunds without centralizing funds.
 
@@ -13,7 +13,13 @@ A secure escrow and dispute resolution system built on top of x402 payments for 
 - Allows automatic or semi-automatic refunds
 - Integrates AI agents to suggest dispute outcomes
 
-## ✨ Features
+## Links
+
+- [**Live Demo**](https://x402-refund-dispute-layer.vercel.app/)
+- **Video Demo**: [TODO]
+- [**Smart Contract (PolygonScan)**](https://amoy.polygonscan.com/address/0x106062376b854ac79b7bccb640ee63b4cfdd1cd2#code)
+
+## Features
 
 ### Core Functionality
 - **Payment Escrow**: Secure smart contract escrow for payments
@@ -31,7 +37,7 @@ A secure escrow and dispute resolution system built on top of x402 payments for 
 - Simulated AI dispute analysis with rule-based logic
 - Comprehensive smart contract tests (>80% coverage)
 
-## 🏗️ Architecture
+## Architecture
 
 ### Smart Contracts
 - **DisputeEscrow.sol**: Main escrow contract with all payment and dispute logic
@@ -45,7 +51,7 @@ A secure escrow and dispute resolution system built on top of x402 payments for 
 - **Refund Interface**: Request refunds with reasons
 - **Admin Panel**: AI-assisted dispute resolution
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js 18+ and npm/yarn
@@ -118,9 +124,9 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 
 3. **Connect wallet**
 - Connect MetaMask to Polygon Amoy testnet
-- Get test MATIC from faucet if needed
+- Get test POL from faucet if needed
 
-## 📖 Usage Guide
+## Usage Guide
 
 ### For Buyers/Senders
 
@@ -165,7 +171,7 @@ Navigate to [http://localhost:3000](http://localhost:3000)
    - Reject refunds → funds go to receiver
    - Use batch operations for efficiency
 
-## 🤖 AI Dispute Resolution
+## AI Dispute Resolution
 
 The system includes a simulated AI agent that analyzes disputes and provides recommendations:
 
@@ -205,7 +211,7 @@ Comprehensive test coverage including:
 4. Test dispute resolution from admin panel
 5. Verify batch operations
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 x402-Refund-Dispute-Layer/
@@ -266,62 +272,24 @@ x402-Refund-Dispute-Layer/
 - **ChainId**: 80002
 - **RPC**: https://rpc-amoy.polygon.technology/
 
-## 🎓 ETHGlobal Track Eligibility
+## ETHGlobal Track Eligibility
 
-### Polygon Track ✅
-- ✅ Extends x402 protocol with refund/dispute capability
-- ✅ Deployed to Polygon Network (Amoy testnet)
-- ✅ Innovative payment use case (escrow + disputes)
-- ✅ Combines payment infrastructure with agentic tooling
-- ✅ GitHub repository with README and setup instructions
-- ✅ Demo video ready
+### Polygon Track 
+- Extends x402 protocol with refund/dispute capability
+- Deployed to Polygon Network (Amoy testnet)
+- Innovative payment use case (escrow + disputes)
+- Combines payment infrastructure with agentic tooling
+- GitHub repository with README and setup instructions
+- Demo video ready
 
-### Hardhat Track ✅
-- ✅ All smart contracts developed using Hardhat
-- ✅ Comprehensive test suite using Hardhat framework
-- ✅ Deployment scripts using Hardhat
-- ✅ Contract verification via Hardhat plugins
-- ✅ Documentation of Hardhat usage
+### Hardhat Track 
+- All smart contracts developed using Hardhat
+- Comprehensive test suite using Hardhat framework
+- Deployment scripts using Hardhat
+- Contract verification via Hardhat plugins
+- Documentation of Hardhat usage
 
-## 🎬 Demo Video Script
-
-### Scene 1: Introduction (30s)
-- Show problem: crypto payments are final, disputes are hard
-- Introduce x402 Refund & Dispute Layer solution
-
-### Scene 2: Create Payment (30s)
-- Connect wallet on Polygon Amoy
-- Create escrowed payment to merchant
-- Show funds locked in contract
-
-### Scene 3: Refund Request (45s)
-- Buyer discovers issue (product not shipped)
-- Submit refund request with reason
-- Show payment status change to "Disputed"
-
-### Scene 4: AI Dispute Resolution (45s)
-- Navigate to admin panel
-- AI analyzes dispute reason
-- Show confidence score and reasoning
-- Admin approves refund
-
-### Scene 5: Refund Completion (30s)
-- Transaction executes on-chain
-- Funds return to buyer automatically
-- Show updated payment status: "Refunded"
-
-### Scene 6: Batch Operations (30s, optional)
-- Show multiple disputed payments
-- Select several disputes
-- Batch resolve with one transaction
-
-### Scene 7: Outro (30s)
-- Recap value proposition
-- Trust layer for crypto commerce
-- Protects buyers and merchants
-- Call to action
-
-## 🚨 Security Considerations
+## Security Considerations
 
 ### Smart Contract Security
 - Role-based access control
@@ -343,7 +311,7 @@ x402-Refund-Dispute-Layer/
 - Bug bounty program
 - Emergency pause functionality
 
-## 📝 Smart Contract Functions
+## Smart Contract Functions
 
 ### User Functions
 - `createPayment(address _receiver)`: Create escrowed payment
@@ -363,33 +331,12 @@ x402-Refund-Dispute-Layer/
 - `getSenderPayments(address _sender)`: Get user's sent payments
 - `getReceiverPayments(address _receiver)`: Get user's received payments
 
-## 🤝 Contributing
+## Contributing
 
 This is a hackathon project for ETHGlobal. Contributions, issues, and feature requests are welcome!
 
-## 📄 License
+## License
 
 MIT License - feel free to use this code for your own projects
 
-## 🔗 Links
-
-- **Live Demo**: [Deploy and add link]
-- **Video Demo**: [Record and add link]
-- **Smart Contract (PolygonScan)**: [Verify and add link]
-- **GitHub**: [This repository]
-
-## 👥 Team
-
-Built for ETHGlobal Hackathon
-
-## 🙏 Acknowledgments
-
-- Polygon team for x402 and infrastructure
-- Hardhat for excellent development tools
-- RainbowKit for seamless wallet integration
-- ETHGlobal for organizing the hackathon
-
----
-
 Built with ❤️ for ETHGlobal | Polygon Track | Hardhat Track
-
