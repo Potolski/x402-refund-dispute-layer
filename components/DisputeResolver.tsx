@@ -297,10 +297,10 @@ export function DisputeResolver({ payment, onSuccess }: DisputeResolverProps) {
       {/* Action Buttons */}
       <div className="space-y-3">
         <p className="text-sm text-gray-600 font-semibold">Your Decision:</p>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={() => setSelected(true)}
-            className={`flex-1 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 text-sm md:text-base ${
               selected === true
                 ? "bg-green-500 text-white ring-4 ring-green-200"
                 : "bg-green-100 text-green-800 hover:bg-green-200"
@@ -310,7 +310,7 @@ export function DisputeResolver({ payment, onSuccess }: DisputeResolverProps) {
           </button>
           <button
             onClick={() => setSelected(false)}
-            className={`flex-1 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 text-sm md:text-base ${
               selected === false
                 ? "bg-red-500 text-white ring-4 ring-red-200"
                 : "bg-red-100 text-red-800 hover:bg-red-200"

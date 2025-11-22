@@ -85,23 +85,23 @@ export default function AdminPage() {
     <main className="min-h-screen bg-gray-50">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">
                 Admin Panel - Dispute Resolution
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs md:text-sm text-gray-600">
                 Review and resolve payment disputes
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               <Link
                 href="/"
-                className="text-primary hover:text-secondary font-semibold"
+                className="btn-secondary text-sm md:text-base py-2 px-3 md:px-4"
               >
-                ← Back to Dashboard
+                ← Back
               </Link>
               <ConnectWallet />
             </div>
@@ -125,7 +125,7 @@ export default function AdminPage() {
         ) : (
           <>
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8">
               <div className="card bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
                 <div className="text-sm text-orange-700 font-semibold">
                   Pending Disputes
@@ -157,7 +157,7 @@ export default function AdminPage() {
             {/* Batch Actions */}
             {selectedPayments.size > 0 && (
               <div className="card mb-6 bg-blue-50 border-blue-200">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
                   <div>
                     <h3 className="font-bold text-blue-900">
                       Batch Actions ({selectedPayments.size} selected)
@@ -166,26 +166,26 @@ export default function AdminPage() {
                       Resolve multiple disputes at once
                     </p>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <button
                       onClick={handleBatchApprove}
                       disabled={isBatchPending}
-                      className="btn-success"
+                      className="btn-success text-sm md:text-base"
                     >
-                      Approve All Selected
+                      Approve All
                     </button>
                     <button
                       onClick={handleBatchReject}
                       disabled={isBatchPending}
-                      className="btn-danger"
+                      className="btn-danger text-sm md:text-base"
                     >
-                      Reject All Selected
+                      Reject All
                     </button>
                     <button
                       onClick={() => setSelectedPayments(new Set())}
-                      className="btn-secondary"
+                      className="btn-secondary text-sm md:text-base"
                     >
-                      Clear Selection
+                      Clear
                     </button>
                   </div>
                 </div>
@@ -213,7 +213,7 @@ export default function AdminPage() {
               />
             ) : (
               <div>
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
                   <h2 className="text-xl font-bold text-gray-800">
                     Disputed Payments
                   </h2>
@@ -227,7 +227,7 @@ export default function AdminPage() {
                         );
                       }
                     }}
-                    className="btn-secondary text-sm"
+                    className="btn-secondary text-sm w-full sm:w-auto"
                   >
                     {selectedPayments.size === disputedPayments.length
                       ? "Deselect All"
@@ -235,7 +235,7 @@ export default function AdminPage() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
                   {disputedPayments.map((payment) => (
                     <div key={payment.id.toString()} className="relative">
                       <input

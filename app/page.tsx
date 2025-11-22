@@ -4,44 +4,72 @@ import { ConnectWallet } from "@/components/ConnectWallet";
 import { PaymentList } from "@/components/PaymentList";
 import { CreatePaymentForm } from "@/components/CreatePaymentForm";
 import { HeroSection } from "@/components/HeroSection";
+import { HowItWorks } from "@/components/HowItWorks";
+import { StatsOverview } from "@/components/StatsOverview";
 import { EmptyState } from "@/components/EmptyState";
 import { ToastContainer } from "@/components/Toast";
+import { DemoModeToggle } from "@/components/DemoModeToggle";
 import { usePayments } from "@/lib/hooks/usePayments";
 import { useToast } from "@/lib/hooks/useToast";
+import { generateDemoPayments, isDemoMode } from "@/lib/demoData";
 import { useAccount } from "wagmi";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { MdRefresh } from "react-icons/md";
+import { MdRefresh, MdAdminPanelSettings } from "react-icons/md";
 
 export default function Home() {
-  const { isConnected } = useAccount();
-  const { payments, isLoading, refetch } = usePayments();
+  const { isConnected, address } = useAccount();
+  const { payments: realPayments, isLoading: realLoading, refetch } = usePayments();
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [demoEnabled, setDemoEnabled] = useState(false);
   const { toasts, removeToast, success, error, info } = useToast();
+
+  useEffect(() => {
+    setDemoEnabled(isDemoMode());
+  }, []);
+
+  const { payments, isLoading } = useMemo(() => {
+    if (demoEnabled && address) {
+      return {
+        payments: generateDemoPayments(address),
+        isLoading: false,
+      };
+    }
+    return {
+      payments: realPayments,
+      isLoading: realLoading,
+    };
+  }, [demoEnabled, address, realPayments, realLoading]);
 
   return (
     <main className="min-h-screen">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
+      <DemoModeToggle onToggle={setDemoEnabled} />
+      
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">
                 x402 Refund & Dispute Layer
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs md:text-sm text-gray-600">
                 Secure escrow payments with dispute resolution
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-3">
               <Link
                 href="/admin"
-                className="text-primary hover:text-secondary font-semibold"
+                className="btn-secondary flex items-center gap-2 text-sm md:text-base"
               >
-                Admin Panel
+                <MdAdminPanelSettings className="text-lg md:text-xl" />
+                <span className="hidden sm:inline">Admin Panel</span>
+                <span className="sm:hidden">Admin</span>
               </Link>
-              <ConnectWallet />
+              <div className="flex items-center">
+                <ConnectWallet />
+              </div>
             </div>
           </div>
         </div>
@@ -51,6 +79,7 @@ export default function Home() {
         {!isConnected ? (
           <>
             <HeroSection />
+            <HowItWorks />
             <EmptyState
               icon="lock"
               title="Connect Your Wallet"
@@ -64,13 +93,18 @@ export default function Home() {
         ) : (
           <>
             {/* Hero Section for Connected Users */}
-            {!showCreateForm && payments.length === 0 && <HeroSection />}
+            {!showCreateForm && payments.length === 0 && (
+              <>
+                <HeroSection />
+                <HowItWorks />
+              </>
+            )}
             
             {/* Action Buttons */}
-            <div className="flex gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8">
               <button
                 onClick={() => setShowCreateForm(!showCreateForm)}
-                className="btn-primary"
+                className="btn-primary w-full sm:w-auto"
               >
                 {showCreateForm ? "View Payments" : "Create New Payment"}
               </button>
@@ -79,7 +113,7 @@ export default function Home() {
                   refetch();
                   info("Refreshing payments...");
                 }} 
-                className="btn-secondary flex items-center gap-2"
+                className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 <MdRefresh className="text-lg" /> Refresh
               </button>
@@ -103,8 +137,11 @@ export default function Home() {
               </div>
             ) : (
               <>
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                {/* Stats Dashboard */}
+                <StatsOverview payments={payments} />
+
+                {/* Old Stats - Keep for reference but hidden */}
+                <div className="hidden grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                   <div className="card bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
                     <div className="text-sm text-blue-700 font-semibold">
                       Total Payments

@@ -77,31 +77,31 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
         </div>
 
         <div className="space-y-3 mb-4">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Amount:</span>
-            <span className="font-bold text-lg text-primary">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 text-sm md:text-base">Amount:</span>
+            <span className="font-bold text-base md:text-lg text-primary">
               {formatEther(payment.amount)} MATIC
             </span>
           </div>
 
-          <div className="flex justify-between">
-            <span className="text-gray-600">From:</span>
-            <span className="font-mono text-sm">
+          <div className="flex justify-between items-start">
+            <span className="text-gray-600 text-sm md:text-base">From:</span>
+            <span className="font-mono text-xs md:text-sm text-right">
               {formatAddress(payment.sender)}
               {isSender && (
-                <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded whitespace-nowrap">
                   You
                 </span>
               )}
             </span>
           </div>
 
-          <div className="flex justify-between">
-            <span className="text-gray-600">To:</span>
-            <span className="font-mono text-sm">
+          <div className="flex justify-between items-start">
+            <span className="text-gray-600 text-sm md:text-base">To:</span>
+            <span className="font-mono text-xs md:text-sm text-right">
               {formatAddress(payment.receiver)}
               {isReceiver && (
-                <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded whitespace-nowrap">
                   You
                 </span>
               )}
@@ -136,11 +136,11 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
           </div>
         )}
 
-        <div className="flex gap-2 mt-4">
+        <div className="flex flex-col sm:flex-row gap-2 mt-4">
           {canRequestRefund && (
             <button
               onClick={() => setShowRefundModal(true)}
-              className="btn-danger flex-1"
+              className="btn-danger flex-1 text-sm md:text-base"
             >
               Request Refund
             </button>
@@ -149,7 +149,7 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
             <button
               onClick={handleComplete}
               disabled={isCompleting}
-              className="btn-success flex-1"
+              className="btn-success flex-1 text-sm md:text-base"
             >
               {isCompleting ? "Processing..." : "Complete Payment"}
             </button>
