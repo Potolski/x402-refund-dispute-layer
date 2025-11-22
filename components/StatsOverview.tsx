@@ -69,7 +69,7 @@ export function StatsOverview({ payments }: StatsOverviewProps) {
     },
     {
       label: "Total Volume",
-      value: `${stats.totalVolume} MATIC`,
+      value: `${stats.totalVolume} POL`,
       icon: <MdAccountBalanceWallet className="text-2xl" />,
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-50",

@@ -18,7 +18,7 @@ export function formatAddress(address: string, length: number = 4): string {
 export function formatAmount(
   amount: bigint,
   decimals: number = 4,
-  symbol: string = "MATIC"
+  symbol: string = "POL"
 ): string {
   const formatted = parseFloat(formatEther(amount)).toFixed(decimals);
   return `${formatted} ${symbol}`;

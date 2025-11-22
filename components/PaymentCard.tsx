@@ -102,7 +102,7 @@ export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
           <div className="flex justify-between items-center">
             <span className="text-gray-600 text-sm md:text-base">Amount:</span>
             <span className="font-bold text-base md:text-lg text-primary">
-              {formatEther(payment.amount)} MATIC
+              {formatEther(payment.amount)} POL
             </span>
           </div>
 

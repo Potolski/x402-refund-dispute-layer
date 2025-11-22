@@ -11,7 +11,7 @@ export const generateDemoPayments = (userAddress: string): Payment[] => {
       id: BigInt(0),
       sender: userAddress,
       receiver: otherAddress1,
-      amount: BigInt("1500000000000000000"), // 1.5 MATIC
+      amount: BigInt("1500000000000000000"), // 1.5 POL
       status: PaymentStatus.Completed,
       timestamp: BigInt(now - 86400 * 5), // 5 days ago
       disputeDeadline: BigInt(now - 86400 * 5 + 14 * 86400),
@@ -22,7 +22,7 @@ export const generateDemoPayments = (userAddress: string): Payment[] => {
       id: BigInt(1),
       sender: otherAddress2,
       receiver: userAddress,
-      amount: BigInt("2300000000000000000"), // 2.3 MATIC
+      amount: BigInt("2300000000000000000"), // 2.3 POL
       status: PaymentStatus.Pending,
       timestamp: BigInt(now - 86400 * 2), // 2 days ago
       disputeDeadline: BigInt(now - 86400 * 2 + 14 * 86400),
@@ -33,7 +33,7 @@ export const generateDemoPayments = (userAddress: string): Payment[] => {
       id: BigInt(2),
       sender: userAddress,
       receiver: otherAddress3,
-      amount: BigInt("5000000000000000000"), // 5 MATIC
+      amount: BigInt("5000000000000000000"), // 5 POL
       status: PaymentStatus.Disputed,
       timestamp: BigInt(now - 86400 * 7), // 7 days ago
       disputeDeadline: BigInt(now - 86400 * 7 + 14 * 86400),
@@ -44,7 +44,7 @@ export const generateDemoPayments = (userAddress: string): Payment[] => {
       id: BigInt(3),
       sender: otherAddress1,
       receiver: userAddress,
-      amount: BigInt("750000000000000000"), // 0.75 MATIC
+      amount: BigInt("750000000000000000"), // 0.75 POL
       status: PaymentStatus.Refunded,
       timestamp: BigInt(now - 86400 * 10), // 10 days ago
       disputeDeadline: BigInt(now - 86400 * 10 + 14 * 86400),
@@ -55,7 +55,7 @@ export const generateDemoPayments = (userAddress: string): Payment[] => {
       id: BigInt(4),
       sender: userAddress,
       receiver: otherAddress2,
-      amount: BigInt("1000000000000000000"), // 1 MATIC
+      amount: BigInt("1000000000000000000"), // 1 POL
       status: PaymentStatus.Pending,
       timestamp: BigInt(now - 86400), // 1 day ago
       disputeDeadline: BigInt(now - 86400 + 14 * 86400),
@@ -66,7 +66,7 @@ export const generateDemoPayments = (userAddress: string): Payment[] => {
       id: BigInt(5),
       sender: otherAddress3,
       receiver: userAddress,
-      amount: BigInt("3200000000000000000"), // 3.2 MATIC
+      amount: BigInt("3200000000000000000"), // 3.2 POL
       status: PaymentStatus.Completed,
       timestamp: BigInt(now - 86400 * 15), // 15 days ago
       disputeDeadline: BigInt(now - 86400 * 15 + 14 * 86400),
@@ -77,7 +77,7 @@ export const generateDemoPayments = (userAddress: string): Payment[] => {
       id: BigInt(6),
       sender: userAddress,
       receiver: otherAddress1,
-      amount: BigInt("4500000000000000000"), // 4.5 MATIC
+      amount: BigInt("4500000000000000000"), // 4.5 POL
       status: PaymentStatus.Disputed,
       timestamp: BigInt(now - 86400 * 3), // 3 days ago
       disputeDeadline: BigInt(now - 86400 * 3 + 14 * 86400),
@@ -88,7 +88,7 @@ export const generateDemoPayments = (userAddress: string): Payment[] => {
       id: BigInt(7),
       sender: otherAddress2,
       receiver: userAddress,
-      amount: BigInt("1800000000000000000"), // 1.8 MATIC
+      amount: BigInt("1800000000000000000"), // 1.8 POL
       status: PaymentStatus.Completed,
       timestamp: BigInt(now - 86400 * 20), // 20 days ago
       disputeDeadline: BigInt(now - 86400 * 20 + 14 * 86400),

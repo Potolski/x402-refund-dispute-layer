@@ -85,7 +85,7 @@ export function CreatePaymentForm({ onSuccess, onToast }: CreatePaymentFormProps
 
         <div className="mb-6">
           <label className="block text-gray-700 font-semibold mb-2">
-            Amount (MATIC) *
+            Amount (POL) *
           </label>
           <input
             type="number"

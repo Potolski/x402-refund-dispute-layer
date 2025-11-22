@@ -62,7 +62,7 @@ export function PaymentDetailModal({ payment, onClose, userAddress }: PaymentDet
             <div className="text-right">
               <p className="text-sm text-gray-600">Amount</p>
               <p className="text-3xl font-bold text-primary">
-                {formatEther(payment.amount)} MATIC
+                {formatEther(payment.amount)} POL
               </p>
             </div>
           </div>

@@ -90,7 +90,7 @@ export function DisputeResolver({ payment, onSuccess }: DisputeResolverProps) {
             Payment #{payment.id.toString()}
           </h3>
           <p className="text-sm text-gray-500 mt-1">
-            Amount: {formatEther(payment.amount)} MATIC
+            Amount: {formatEther(payment.amount)} POL
           </p>
         </div>
         <span className="badge badge-disputed">Disputed</span>

@@ -9,7 +9,7 @@ async function main() {
 
   // Get account balance
   const balance = await ethers.provider.getBalance(deployer.address);
-  console.log("Account balance:", ethers.formatEther(balance), "MATIC");
+  console.log("Account balance:", ethers.formatEther(balance), "POL");
 
   // Deploy DisputeEscrow
   console.log("\nDeploying DisputeEscrow...");

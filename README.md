@@ -77,7 +77,7 @@ A secure escrow and dispute resolution system extending the x402 payment protoco
 ### Prerequisites
 - Node.js 18+ and npm/yarn
 - MetaMask or compatible Web3 wallet
-- Polygon Amoy testnet MATIC (get from [faucet](https://faucet.polygon.technology/))
+- Polygon Amoy testnet POL (get from [faucet](https://faucet.polygon.technology/))
 
 ### Installation
 
