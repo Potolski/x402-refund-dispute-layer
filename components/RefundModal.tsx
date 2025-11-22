@@ -8,9 +8,10 @@ interface RefundModalProps {
   payment: Payment;
   onClose: () => void;
   onSuccess: () => void;
+  onToast?: (message: string, type: "success" | "error" | "info") => void;
 }
 
-export function RefundModal({ payment, onClose, onSuccess }: RefundModalProps) {
+export function RefundModal({ payment, onClose, onSuccess, onToast }: RefundModalProps) {
   const [reason, setReason] = useState("");
   const [evidence, setEvidence] = useState("");
   const { requestRefund, isPending, isSuccess } = useRefundRequest();
@@ -23,10 +24,13 @@ export function RefundModal({ payment, onClose, onSuccess }: RefundModalProps) {
     }
 
     try {
+      if (onToast) onToast("Submitting refund request...", "info");
       await requestRefund(payment.id, reason, evidence);
+      if (onToast) onToast("Refund request submitted!", "success");
       onSuccess();
     } catch (error) {
       console.error("Error requesting refund:", error);
+      if (onToast) onToast("Failed to submit refund request", "error");
     }
   };
 

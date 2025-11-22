@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useCreatePayment } from "@/lib/hooks/useCreatePayment";
 import { isAddress } from "viem";
+import { MdCheckCircle } from "react-icons/md";
 
 interface CreatePaymentFormProps {
   onSuccess?: () => void;
+  onToast?: (message: string, type: "success" | "error" | "info") => void;
 }
 
-export function CreatePaymentForm({ onSuccess }: CreatePaymentFormProps) {
+export function CreatePaymentForm({ onSuccess, onToast }: CreatePaymentFormProps) {
   const [receiver, setReceiver] = useState("");
   const [amount, setAmount] = useState("");
   const { createPayment, isPending, isSuccess } = useCreatePayment();
@@ -28,20 +30,23 @@ export function CreatePaymentForm({ onSuccess }: CreatePaymentFormProps) {
     }
 
     try {
+      if (onToast) onToast("Creating payment...", "info");
       await createPayment(receiver, amount);
       setReceiver("");
       setAmount("");
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error creating payment:", error);
+      if (onToast) onToast("Failed to create payment", "error");
     }
   };
 
   if (isSuccess) {
     return (
       <div className="card bg-green-50 border-green-200">
-        <h3 className="text-xl font-bold text-green-700 mb-2">
-          Payment Created Successfully! 🎉
+        <h3 className="text-xl font-bold text-green-700 mb-2 flex items-center gap-2">
+          <MdCheckCircle className="text-2xl" />
+          Payment Created Successfully!
         </h3>
         <p className="text-green-600 mb-4">
           Your escrowed payment has been created. The funds are securely held until

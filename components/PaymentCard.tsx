@@ -2,20 +2,24 @@
 
 import { Payment, PaymentStatus } from "@/lib/types";
 import { StatusBadge } from "./StatusBadge";
+import { PaymentTimeline } from "./PaymentTimeline";
 import { formatEther } from "viem";
 import { useState } from "react";
 import { RefundModal } from "./RefundModal";
 import { useAccount } from "wagmi";
 import { useCompletePayment } from "@/lib/hooks/useCompletePayment";
+import { MdExpandMore, MdExpandLess } from "react-icons/md";
 
 interface PaymentCardProps {
   payment: Payment;
   onRefetch?: () => void;
+  onToast?: (message: string, type: "success" | "error" | "info") => void;
 }
 
-export function PaymentCard({ payment, onRefetch }: PaymentCardProps) {
+export function PaymentCard({ payment, onRefetch, onToast }: PaymentCardProps) {
   const { address } = useAccount();
   const [showRefundModal, setShowRefundModal] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
   const { completePayment, isPending: isCompleting } = useCompletePayment();
 
   const isSender = address?.toLowerCase() === payment.sender.toLowerCase();
@@ -31,10 +35,13 @@ export function PaymentCard({ payment, onRefetch }: PaymentCardProps) {
 
   const handleComplete = async () => {
     try {
+      if (onToast) onToast("Completing payment...", "info");
       await completePayment(payment.id);
+      if (onToast) onToast("Payment completed successfully!", "success");
       if (onRefetch) onRefetch();
     } catch (error) {
       console.error("Error completing payment:", error);
+      if (onToast) onToast("Failed to complete payment", "error");
     }
   };
 
@@ -103,6 +110,21 @@ export function PaymentCard({ payment, onRefetch }: PaymentCardProps) {
           )}
         </div>
 
+        {/* Timeline Toggle */}
+        <button
+          onClick={() => setShowTimeline(!showTimeline)}
+          className="text-sm text-primary hover:text-secondary font-semibold mt-3 flex items-center gap-1 transition-colors"
+        >
+          {showTimeline ? "Hide" : "Show"} Timeline
+          {showTimeline ? <MdExpandLess className="text-lg" /> : <MdExpandMore className="text-lg" />}
+        </button>
+
+        {showTimeline && (
+          <div className="mt-3">
+            <PaymentTimeline payment={payment} />
+          </div>
+        )}
+
         <div className="flex gap-2 mt-4">
           {canRequestRefund && (
             <button
@@ -132,6 +154,7 @@ export function PaymentCard({ payment, onRefetch }: PaymentCardProps) {
             setShowRefundModal(false);
             if (onRefetch) onRefetch();
           }}
+          onToast={onToast}
         />
       )}
     </>

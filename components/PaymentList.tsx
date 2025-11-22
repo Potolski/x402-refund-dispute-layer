@@ -2,33 +2,32 @@
 
 import { Payment, PaymentStatus } from "@/lib/types";
 import { PaymentCard } from "./PaymentCard";
+import { PaymentListSkeleton } from "./LoadingSkeleton";
 import { useState } from "react";
 import { useAccount } from "wagmi";
+import { MdInbox } from "react-icons/md";
 
 interface PaymentListProps {
   payments: Payment[];
   isLoading: boolean;
   onRefetch?: () => void;
+  onToast?: (message: string, type: "success" | "error" | "info") => void;
 }
 
-export function PaymentList({ payments, isLoading, onRefetch }: PaymentListProps) {
+export function PaymentList({ payments, isLoading, onRefetch, onToast }: PaymentListProps) {
   const { address } = useAccount();
   const [filter, setFilter] = useState<"all" | "sent" | "received" | "disputed">(
     "all"
   );
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <PaymentListSkeleton />;
   }
 
   if (!payments || payments.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-6xl mb-4">📦</div>
+        <MdInbox className="text-6xl text-gray-300 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-gray-700 mb-2">
           No payments yet
         </h3>
@@ -115,6 +114,7 @@ export function PaymentList({ payments, isLoading, onRefetch }: PaymentListProps
               key={payment.id.toString()}
               payment={payment}
               onRefetch={onRefetch}
+              onToast={onToast}
             />
           ))}
         </div>

@@ -3,18 +3,23 @@
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { PaymentList } from "@/components/PaymentList";
 import { CreatePaymentForm } from "@/components/CreatePaymentForm";
+import { ToastContainer } from "@/components/Toast";
 import { usePayments } from "@/lib/hooks/usePayments";
+import { useToast } from "@/lib/hooks/useToast";
 import { useAccount } from "wagmi";
 import { useState } from "react";
 import Link from "next/link";
+import { MdLock, MdRefresh } from "react-icons/md";
 
 export default function Home() {
   const { isConnected } = useAccount();
   const { payments, isLoading, refetch } = usePayments();
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const { toasts, removeToast, success, error, info } = useToast();
 
   return (
     <main className="min-h-screen">
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -43,7 +48,7 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {!isConnected ? (
           <div className="text-center py-20">
-            <div className="text-6xl mb-6">🔐</div>
+            <MdLock className="text-6xl text-primary mx-auto mb-6" />
             <h2 className="text-3xl font-bold text-gray-800 mb-4">
               Welcome to x402 Refund & Dispute Layer
             </h2>
@@ -65,8 +70,14 @@ export default function Home() {
               >
                 {showCreateForm ? "View Payments" : "Create New Payment"}
               </button>
-              <button onClick={() => refetch()} className="btn-secondary">
-                Refresh
+              <button 
+                onClick={() => {
+                  refetch();
+                  info("Refreshing payments...");
+                }} 
+                className="btn-secondary flex items-center gap-2"
+              >
+                <MdRefresh className="text-lg" /> Refresh
               </button>
             </div>
 
@@ -76,7 +87,13 @@ export default function Home() {
                 <CreatePaymentForm
                   onSuccess={() => {
                     setShowCreateForm(false);
+                    success("Payment created successfully!");
                     refetch();
+                  }}
+                  onToast={(message, type) => {
+                    if (type === "success") success(message);
+                    else if (type === "error") error(message);
+                    else info(message);
                   }}
                 />
               </div>
@@ -123,6 +140,11 @@ export default function Home() {
                   payments={payments}
                   isLoading={isLoading}
                   onRefetch={refetch}
+                  onToast={(message, type) => {
+                    if (type === "success") success(message);
+                    else if (type === "error") error(message);
+                    else info(message);
+                  }}
                 />
               </>
             )}
